@@ -1,0 +1,35 @@
+load-plugin library=/usr/lib/libsovtoken.so initializer=sovtoken_init
+
+pool create sovrin_payment_pool gen_txn_file=tmp/genesis_txn.txt
+pool connect sovrin_payment_pool protocol-version=2 timeout=15
+
+wallet create wallet_sovrin key=sov
+wallet open wallet_sovrin key=sov
+
+did new seed=000000000000000000000000Trustee1 metadata="Default Trustee"
+did new seed=000000000000000000000000Trustee2 metadata="Default Trustee"
+did new seed=000000000000000000000000Trustee3 metadata="Default Trustee"
+did new seed=000000000000000000000000Trustee4 metadata="Default Trustee"
+
+did use V4SGRU86Z58d6TV7PBUe6f
+
+ledger nym did=LnXR1rPnncTPZvRdmJKhJQ role=TRUSTEE verkey=~RTBtVN3iwcFhbWZzohFTMi
+ledger nym did=PNQm3CwyXbN5e39Rw3dXYx role=TRUSTEE verkey=~AHtGeRXtGjVfXALtXP9WiX
+ledger nym did=KMSWjAnqdwgLRc5yZBygcA role=TRUSTEE verkey=~SYaYSBf1ngDyM4VtKf7nxW
+
+payment-address create payment_method=sov seed=000000000000000000000000000Seed1
+
+did use V4SGRU86Z58d6TV7PBUe6f
+ledger mint-prepare outputs=(pay:sov:24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP,100000000)
+
+did use LnXR1rPnncTPZvRdmJKhJQ
+ledger sign-multi txn={"operation":{"type":"10000","outputs":[{"address":"24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP","amount":100000000}]},"reqId":357287870,"protocolVersion":2,"identifier":"V4SGRU86Z58d6TV7PBUe6f"}
+
+did use PNQm3CwyXbN5e39Rw3dXYx
+ledger sign-multi txn={"identifier":"V4SGRU86Z58d6TV7PBUe6f","operation":{"outputs":[{"address":"24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP","amount":100000000}],"type":"10000"},"protocolVersion":2,"reqId":357287870,"signatures":{"LnXR1rPnncTPZvRdmJKhJQ":"5zr43FfVbW313gB3BLUUpcWvmd6ibHmqw51SCqV2Zzf5DDSJvKVu39f9m5hjJiWjT7EQ8VYhuhFk86mB4aaYFb4K"}}
+
+did use V4SGRU86Z58d6TV7PBUe6f
+ledger sign-multi txn={"identifier":"V4SGRU86Z58d6TV7PBUe6f","operation":{"outputs":[{"address":"24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP","amount":100000000}],"type":"10000"},"protocolVersion":2,"reqId":357287870,"signatures":{"LnXR1rPnncTPZvRdmJKhJQ":"5zr43FfVbW313gB3BLUUpcWvmd6ibHmqw51SCqV2Zzf5DDSJvKVu39f9m5hjJiWjT7EQ8VYhuhFk86mB4aaYFb4K","PNQm3CwyXbN5e39Rw3dXYx":"FoUSgRDcE8bm4gTeXepawPRwkb4XgSZEgBgnZByHhekTs6yiFUSSWnmv1odmDUHB4EafXuf9mMe6foQZPYG27dH"}}
+ledger custom {"identifier":"V4SGRU86Z58d6TV7PBUe6f","operation":{"outputs":[{"address":"24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP","amount":100000000}],"type":"10000"},"protocolVersion":2,"reqId":357287870,"signatures":{"LnXR1rPnncTPZvRdmJKhJQ":"5zr43FfVbW313gB3BLUUpcWvmd6ibHmqw51SCqV2Zzf5DDSJvKVu39f9m5hjJiWjT7EQ8VYhuhFk86mB4aaYFb4K","PNQm3CwyXbN5e39Rw3dXYx":"FoUSgRDcE8bm4gTeXepawPRwkb4XgSZEgBgnZByHhekTs6yiFUSSWnmv1odmDUHB4EafXuf9mMe6foQZPYG27dH","V4SGRU86Z58d6TV7PBUe6f":"9X2Y5vXmHqgYUd4BgEziZsXitLzYRrpY5odttb8WESqLzysQ5eBHEDdn96d2zqDYxssGPMe29bNAgNCSgo6Pk6N"}}
+
+ledger get-payment-sources payment_address=pay:sov:24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP
