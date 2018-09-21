@@ -9,7 +9,7 @@ from threading import Lock
 lock = Lock()
 
 async def create_wallet_pool_trustees(argv):
-    wallet_config = json.dumps({"id": "minter"})
+    wallet_config = json.dumps({"id": "qa"})
     wallet_creds = json.dumps({"key": "1"})
     load_libsovtoken()
 
@@ -21,17 +21,19 @@ async def create_wallet_pool_trustees(argv):
     global wallet_id
     wallet_id = await wallet.open_wallet(wallet_config, wallet_creds)
 
-    pool_name = 'minter_pool'
+    pool_name = 'qa_pool'
     await pool.set_protocol_version(2)
     here = os.path.abspath(os.path.dirname(__file__))
     path = os.path.join(here, 'docker_pool_transactions_genesis')
     pool_config = json.dumps({"genesis_txn": path})
+
     try:
         await pool.create_pool_ledger_config(pool_name, pool_config)
     except:
         pass
 
     global pool_id
+
     pool_id = await pool.open_pool_ledger(pool_name, None)
 
     _ = await get_vk_by_seed_and_did(SEED_1, DID_1)
@@ -46,6 +48,7 @@ async def create_wallet_pool_trustees(argv):
 
 
 async def build_mint_req(request):
+
     s = "".join(map(chr, await request.content.read(-1)))
     json_s = json.loads(s)
 
