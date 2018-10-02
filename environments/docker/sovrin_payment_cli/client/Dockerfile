@@ -10,7 +10,7 @@ RUN apt-get update -y && apt-get -y install \
 # ------ Add local files ------ #
 ADD ./scripts /scripts
 ADD ./genesis_txn.txt /tmp/genesis_txn.txt
-ADD ./batch_cli_startup.txt /tmp/batch_cli_startup.txt
+ADD ./batch /tmp/batch
 
 RUN echo "export PATH=$PATH:/scripts" >> $HOME/.bash_profile;
 

@@ -18,6 +18,7 @@ ledger nym did=PNQm3CwyXbN5e39Rw3dXYx role=TRUSTEE verkey=~AHtGeRXtGjVfXALtXP9Wi
 ledger nym did=KMSWjAnqdwgLRc5yZBygcA role=TRUSTEE verkey=~SYaYSBf1ngDyM4VtKf7nxW
 
 payment-address create payment_method=sov seed=000000000000000000000000000Seed1
+payment-address create payment_method=sov seed=000000000000000000000000000Seed2
 
 did use V4SGRU86Z58d6TV7PBUe6f
 ledger mint-prepare outputs=(pay:sov:24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP,100000000)
