@@ -22,15 +22,65 @@ This will start the pool automatically. You can also start the pool with
 Once you have accessed the client container, you can interact with indy-cli.
 
 ### Startup Script
-There is a startup script, which will create the pool config, connect to the
-pool, create a wallet, 4 trustees, and mints 1 token (100000000 sovatoms) to
-the address `pay:sov:24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP`
+The startup script will:
+1. Create a pool config called `sovrin_payment_pool`
+2. Create a wallet called `wallet_sovrin` with the key `sov`.
+3. Create two payment addresses:
+    1. `pay:sov:24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP`
+    2. `pay:sov:2ViUZnYGwYxx2EztvxAYq8re9ysmCVbzF72jTCXMKzrxUqGqut`
+4. Mint 1 token (100000000 sovatoms) to payment address `pay:sov:24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP`
+
 ```
 bash startup.sh
 ```
 
+### Other Scripts
+There are a few other scripts you can make use of as well. These are under the assumption the `startup.sh` script has been run.
+
+#### fees_set
+Will set the fees accordingly:
+
+'1' (NYM) => 1,
+
+'100' (ATTRIB) => 5,
+
+'101' (SCHEMA) => 10,
+
+'102' (CLAIM DEF) => 20,
+
+'113' (REVOC_REG_DEF) => 30,
+
+'114' (REVOC_REG_ENTRY) => 30,
+
+'10001' (XFER_PUBLIC) => 6
+
+```
+bash fees_set.sh
+```
+
+#### fees_reset
+Will set the fees set in the `fees_set.sh` script to 0:
+
+'1' (NYM) => 0,
+
+'100' (ATTRIB) => 0,
+
+'101' (SCHEMA) => 0,
+
+'102' (CLAIM DEF) => 0,
+
+'113' (REVOC_REG_DEF) => 0,
+
+'114' (REVOC_REG_ENTRY) => 0,
+
+'10001' (XFER_PUBLIC) => 0
+
+```
+bash fees_reset.sh
+```
+
 ### Starting indy-cli
-Otherwise, you can access the cli normally. You do need to load in libsovtoken
+You can access the cli manually. You do need to load in libsovtoken
 every time for payment functionality.
 ```
 indy-cli
@@ -49,4 +99,10 @@ pool connect sovrin_payment_pool protocol-version=2 timeout=15
 wallet create wallet_sovrin key=sov
 
 wallet open wallet_sovrin key=sov
+```
+
+## Other useful commands
+Docker will use a cache, so if you want to rebuild with the latest packages, run:
+```
+docker-compose build --no-cache
 ```

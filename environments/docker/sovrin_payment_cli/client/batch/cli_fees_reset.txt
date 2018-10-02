@@ -1,0 +1,23 @@
+load-plugin library=/usr/lib/libsovtoken.so initializer=sovtoken_init
+
+pool connect sovrin_payment_pool
+
+wallet open wallet_sovrin key=sov
+
+did use V4SGRU86Z58d6TV7PBUe6f
+
+ledger set-fees-prepare payment_method=sov fees=NYM:0,SCHEMA:0,CRED_DEF:0,ATTRIB:0,XFER_PUBLIC:0,REVOC_REG_ENTRY:0,REVOC_REG_DEF:0
+
+ledger sign-multi txn={"operation":{"type":"20000","fees":{"100":0,"114":0,"113":0,"10001":0,"101":0,"102":0,"1":0}},"reqId":763128131,"protocolVersion":2,"identifier":"V4SGRU86Z58d6TV7PBUe6f"}
+
+did use PNQm3CwyXbN5e39Rw3dXYx
+
+ledger sign-multi txn={"identifier":"V4SGRU86Z58d6TV7PBUe6f","operation":{"fees":{"1":0,"100":0,"10001":0,"101":0,"102":0,"113":0,"114":0},"type":"20000"},"protocolVersion":2,"reqId":763128131,"signatures":{"V4SGRU86Z58d6TV7PBUe6f":"5b44DggA3eadz6n6Br8DyeZcUAAsgYHs6TUpYyiHgsZYfzdXFiivJpZAS6qqVvYFbPSuz2L8DMm7FxzPtTbFJxj1"}}
+
+did use LnXR1rPnncTPZvRdmJKhJQ
+
+ledger sign-multi txn={"identifier":"V4SGRU86Z58d6TV7PBUe6f","operation":{"fees":{"1":0,"100":0,"10001":0,"101":0,"102":0,"113":0,"114":0},"type":"20000"},"protocolVersion":2,"reqId":763128131,"signatures":{"PNQm3CwyXbN5e39Rw3dXYx":"4ZGQm88uLNpW29tk1G8D9UVdBxTkcinUcNQwaWD6hrcKFfyLdsXKYkqkdwmSwixpNU1U9zDdFtqFnTiioTbqYbtR","V4SGRU86Z58d6TV7PBUe6f":"5b44DggA3eadz6n6Br8DyeZcUAAsgYHs6TUpYyiHgsZYfzdXFiivJpZAS6qqVvYFbPSuz2L8DMm7FxzPtTbFJxj1"}}
+
+ledger custom {"identifier":"V4SGRU86Z58d6TV7PBUe6f","operation":{"fees":{"1":0,"100":0,"10001":0,"101":0,"102":0,"113":0,"114":0},"type":"20000"},"protocolVersion":2,"reqId":763128131,"signatures":{"LnXR1rPnncTPZvRdmJKhJQ":"3SpW7Puib6qk9cxa11YWMqfKSRocU9tfmYJbe84o5tdDNEshwaZ9vfGhnrsu8KxquaBeDF5v1GDMTm95cCJthVu1","PNQm3CwyXbN5e39Rw3dXYx":"4ZGQm88uLNpW29tk1G8D9UVdBxTkcinUcNQwaWD6hrcKFfyLdsXKYkqkdwmSwixpNU1U9zDdFtqFnTiioTbqYbtR","V4SGRU86Z58d6TV7PBUe6f":"5b44DggA3eadz6n6Br8DyeZcUAAsgYHs6TUpYyiHgsZYfzdXFiivJpZAS6qqVvYFbPSuz2L8DMm7FxzPtTbFJxj1"}}
+
+ledger get-fees payment_method=sov

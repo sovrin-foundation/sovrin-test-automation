@@ -1,2 +1,2 @@
-indy-cli /tmp/batch_cli_startup.txt
+indy-cli /tmp/batch/cli_startup.txt
 /bin/bash
