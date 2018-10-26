@@ -45,7 +45,7 @@ function check_install_sovtoken {
     local p
     local spd
     local v
-    local vers_ins_str
+    local vers_inst_str
 
     if [ -z "$sovtoken_packages" ] ; then
         sovtoken_packages="$sovtoken_packages_def"
@@ -66,6 +66,7 @@ function check_install_sovtoken {
         ns_split=( ${sp//,/ } )
         nsp=${ns_split[0]}
         nsv=${ns_split[1]}
+        vers_inst_str=''
         #If a version was specified, generate a string to use for apt-get install
         if [ ! -z "$nsv" ] ; then
             vers_inst_str="=${nsv}"
@@ -90,7 +91,7 @@ function check_install_sovtoken {
             fi
         done
         if [ "$installed" = false ] ; then
-            /usr/bin/apt-get install "${nsp}${vers_ins_str}"
+            /usr/bin/apt-get install -y $(gen_pkgs_to_install ${nsp}${vers_inst_str})
             pkgs_installed=true
         fi
     done
@@ -98,6 +99,24 @@ function check_install_sovtoken {
         restart_indy_node
         echo -n
     fi
+}
+
+function gen_pkgs_to_install {
+    local package=$1
+    local pkgs=''
+    local ps=( $(apt-cache show $package | grep Depends | head -n 1 | sed 's/^Depends:// ; s/([<>]=[^()]\+)/g /; s/([<>]\{1,2\}[^()]\+)//g ; s/[() ]//g; s/,/ /g') )
+    local pstr="$package"
+    local p
+    local dps
+    for p in "${ps[@]}"; do
+        if [[ $p =~ '=' ]]; then
+            pstr="$pstr\n$p"
+            dps=$(gen_pkgs_to_install $p)
+            echo "package: $package needs: ${dps//$'\n'/,}" >&2
+            pstr="$pstr\n$dps"
+        fi
+    done
+    echo -e "$pstr" | sort -u
 }
 
 function pre_check {
