@@ -1,11 +1,38 @@
 version: '3'
 services:
-  pool:
+  node1:
     build:
-      context: ./pool
+      context: ./node
+      args:
+        node_num: 1
+        port_node: 9701
+        port_client: 9702
+  node2:
+    build:
+      context: ./node
+      args:
+        node_num: 2
+        port_node: 9703
+        port_client: 9704
+  node3:
+    build:
+      context: ./node
+      args:
+        node_num: 3
+        port_node: 9705
+        port_client: 9706
+  node4:
+    build:
+      context: ./node
+      args:
+        node_num: 4
+        port_node: 9707
+        port_client: 9708
   client:
     build:
       context: ./client
     depends_on:
-      - pool
-
+      - node1
+      - node2
+      - node3
+      - node4
