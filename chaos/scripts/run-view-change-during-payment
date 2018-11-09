@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+
+# Pass parameters to experiment via the environment
+# Default parameters are as follows:
+export CHAOS_SEED=000000000000000000000000Trustee1
+export CHAOS_GENESIS_FILE=/home/${USER}/pool1/pool_transactions_genesis
+export CHAOS_SSH_CONFIG_FILE=/home/${USER}/pool1/ssh_config
+export CHAOS_WRITE_NYM_TIMEOUT=60
+export CHAOS_CLEANUP=Y
+export CHAOS_WALLET_NAME=view_change_during_payment
+export CHAOS_WALLET_KEY=view_change_during_payment
+export CHAOS_MINT_SOVATOMS=1000000000
+export CHAOS_TRANSFER_SOVATOMS=1
+export CHAOS_TRANSFERS=1
+export CHAOS_MINT_PAYMENT_ADDRESS="pay:sov:24AE7WLojJd3Z22L6CAY876cLbGskZd3N4ocaE9T1jwX6MXtvP"
+export CHAOS_MINT_PAYMENT_ADDRESS_METHOD="sov"
+export CHAOS_MINT_PAYMENT_ADDRESS_SEED="000000000000000000000000000Seed1"
+export CHAOS_FROM_PAYMENT_ADDRESSES=${CHAOS_MINT_PAYMENT_ADDRESS}
+export CHAOS_CHANGE_PAYMENT_ADDRESS=${CHAOS_MINT_PAYMENT_ADDRESS}
+export CHAOS_GENERATE_TO_PAYMENT_ADDRESSES=420
+export CHAOS_TIMEOUT=300
+export PYTHONPATH=/home/${USER}/chaosindy:/home/${USER}/chaossovtoken
+number_of_executions=1
+
+#TODO: Decide if the following should be exposed as arguments:
+# CHAOS_TRANSFER_SOVATOMS
+# CHAOS_TRANSFERS
+# CHAOS_MINT_PAYMENT_ADDRESS
+# CHAOS_MINT_PAYMENT_ADDRESS_METHOD
+# CHAOS_MINT_PAYMENT_ADDRESS_SEED
+# CHAOS_FROM_PAYMENT_ADDRESSES
+# CHAOS_CHANGE_PAYMENT_ADDRESS
+# CHAOS_GENERATE_TO_PAYMENT_ADDRESSES
+usage(){
+    echo "Usage: $0"
+    echo " required arguments: None"
+    echo " optional arguments:"
+    echo "   -a|--sovatoms"
+    echo "       The number of sovatoms to mint"
+    echo "       Default: ${CHAOS_MINT_SOVATOMS}"
+    echo "       Valid Input: Any positive number > 1"
+    echo "   -c|--cleanup"
+    echo "       Remove temporary files/directories created by the experiment?"
+    echo "       Default: Yes"
+    echo "       Valid Inputs (case insensitive): yes, y, 1, no, n, 0"
+    echo "   -e|--execution-count"
+    echo "       How many times to run the experiment."
+    echo "       Default: ${number_of_executions}"
+    echo "       Valid Input: Any positive number >= 1"
+    echo "   -f|--ssh-config-file"
+    echo "       Path to the ssh config file (see 'man ssh_config') that maps a"
+    echo "       validator node Host names (alias used in the genesis file) to"
+    echo "       their respective , default User, Hostname (IP address in this"
+    echo "       case and Identify File (i.e. PEM file)."
+    echo "       Default: ${CHAOS_SSH_CONFIG_FILE}"
+    echo "   -g|--genesis-file"
+    echo "       Path to the target pool genesis transaction file."
+    echo "       Default: ${CHAOS_GENESIS_FILE}"
+    echo "   -h|--help"
+    echo "       Print script help/usage"
+    echo "   -i|--inputs-and-outputs"
+    echo "       The number of inputs and outputs to try."
+    echo "       Default: ${CHAOS_GENERATE_TO_PAYMENT_ADDRESSES}"
+    echo "   -k|--wallet-key"
+    echo "       A wallet key"
+    echo "       Default: ${CHAOS_WALLET_KEY}"
+    echo "   -t|--write-nym-timeout"
+    echo "       How long to wait (seconds) before timing out while writing a NYM"
+    echo "         transaction."
+    echo "       Default: ${CHAOS_WRITE_NYM_TIMEOUT}"
+    echo "       Valid Input: Any positive number >= 1"
+    echo "   -s|--seed"
+    echo "       Seed to use to create DID/Verkey pair used to get validator info"
+    echo "         via indy-cli. Must be a Trustee or Steward seed."
+    echo "       Default: ${CHAOS_SEED}"
+    echo "       Valid Input: A 32 byte string. See default above for an example."
+    echo "   -w|--wallet-name"
+    echo "       A wallet name"
+    echo "       Default: ${CHAOS_WALLET_NAME}"
+    exit 1
+}
+
+# Get this script's directory
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  TARGET="$(readlink "$SOURCE")"
+  if [[ $SOURCE == /* ]]; then
+    SOURCE="$TARGET"
+  else
+    DIR="$( dirname "$SOURCE" )"
+    SOURCE="$DIR/$TARGET"
+  fi
+done
+RDIR="$( dirname "$SOURCE" )"
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Remove the wallet used by indy-cli. The experiment will create a new one.
+sudo rm -rf ~/.indy_client
+
+# Parse arguments; preserving positional arguments
+# Positional arguments are assumed if the 'key' is not found in the following
+# case statement
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -a|--sovatoms)
+    export CHAOS_MINT_SOVATOMS=$2
+    shift # past argument
+    shift # past value
+    ;;
+    -c|--cleanup)
+    value="$2"
+    case $value in
+        [yY][eE][sS]|[yY]|[1])
+        export CHAOS_CLEANUP='Yes'
+        ;;
+        [nN][oO]|[nN]|[0])
+        export CHAOS_CLEANUP=''
+        ;;
+        *)
+        echo "Invalid cleanup value ${value}"
+        usage
+        ;;
+    esac
+    shift # past argument
+    shift # past value
+    ;;
+    -e|--execution-count)
+    number_of_executions=$2
+    shift # past argument
+    shift # past value
+    ;;
+    -f|--ssh-config-file)
+    export CHAOS_SSH_CONFIG_FILE="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -g|--genesis-file)
+    export CHAOS_GENESIS_FILE="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -h|--help)
+    usage
+    shift # past argument
+    ;;
+    -i|--inputs-and-outputs)
+    export CHAOS_GENERATE_TO_PAYMENT_ADDRESSES="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -k|--wallet-key)
+    export CHAOS_WALLET_KEY="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -t|--write-nym-timeout)
+    export CHAOS_WRITE_NYM_TIMEOUT=$2
+    shift # past argument
+    shift # past value
+    ;;
+    -s|--seed)
+    export CHAOS_SEED="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -w|--wallet-name)
+    export CHAOS_WALLET_NAME="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters. May be useful for customizing call to chaos binary.
+
+echo CHAOS_SEED=${CHAOS_SEED}
+echo CHAOS_GENESIS_FILE=${CHAOS_GENESIS_FILE}
+echo CHAOS_SSH_CONFIG_FILE=${CHAOS_SSH_CONFIG_FILE}
+echo CHAOS_WRITE_NYM_TIMEOUT=${CHAOS_WRITE_NYM_TIMEOUT}
+echo CHAOS_CLEANUP=${CHAOS_CLEANUP}
+echo CHAOS_WALLET_NAME=${CHAOS_WALLET_NAME}
+echo CHAOS_WALLET_KEY=${CHAOS_WALLET_KEY}
+echo CHAOS_MINT_SOVATOMS=${CHAOS_MINT_SOVATOMS}
+echo CHAOS_TRANSFER_SOVATOMS=${CHAOS_TRANSFER_SOVATOMS}
+echo CHAOS_TRANSFERS=${CHAOS_TRANSFERS}
+echo CHAOS_MINT_PAYMENT_ADDRESS=${CHAOS_MINT_PAYMENT_ADDRESS}
+echo CHAOS_MINT_PAYMENT_ADDRESS_METHOD=${CHAOS_MINT_PAYMENT_ADDRESS_METHOD}
+echo CHAOS_MINT_PAYMENT_ADDRESS_SEED=${CHAOS_MINT_PAYMENT_ADDRESS_SEED}
+echo CHAOS_FROM_PAYMENT_ADDRESSES=${CHAOS_FROM_PAYMENT_ADDRESSES}
+echo CHAOS_CHANGE_PAYMENT_ADDRESS=${CHAOS_CHANGE_PAYMENT_ADDRESS}
+echo CHAOS_GENERATE_TO_PAYMENT_ADDRESSES=${CHAOS_GENERATE_TO_PAYMENT_ADDRESSES}
+echo CHAOS_TIMEOUT=${CHAOS_TIMEOUT}
+echo PYTHONPATH=${PYTHONPATH}
+echo number_of_executions=${number_of_executions}
+
+# Validation should be done here, because the defaults may be invalid
+if [ ! -f "${CHAOS_SSH_CONFIG_FILE}" ]
+then
+    echo "SSH configuration file ${CHAOS_SSH_CONFIG_FILE} does not exist."
+    usage
+fi
+if [ ! -f "${CHAOS_GENESIS_FILE}" ]
+then
+    echo "Pool genesis transaction file ${CHAOS_GENESIS_FILE} does not exist."
+    usage
+fi
+
+# Run the experiment
+for i in $(seq 1 ${number_of_executions})
+do
+  echo "********************** Experiment Iteration $i of $number_of_executions ********************"
+  exec 5>&1
+  result=$(chaos --verbose run ${DIR}/../experiments/view-change-during-payment.json 2>&1 | tee >(cat - >&5))
+
+  echo "Check for failed experiment..."
+  echo "Begin printing captured results..."
+  echo "$result"
+  echo "End printing captured results..."
+  if [ $? != 0 ]
+  then
+    echo "Failed to write nym after $i iteration(s)"
+    exit 1
+  fi
+  if echo "$result" | grep "Experiment ended with status: failed"
+  then
+    echo "Failed to write nym after $i iteration(s)"
+    exit 1
+  fi
+done
