@@ -1,0 +1,216 @@
+{
+    "version": "1.0.0",
+    "title": "Fee Input and Output Limits",
+    "description": "Ensure that the fee input and output limits are performant.",
+    "tags": [
+        "token",
+        "transfer",
+        "concensus"
+    ],
+    "configuration": {
+        "seed": {
+            "type": "env",
+            "key": "CHAOS_SEED"
+        },
+        "genesis_file": {
+            "type": "env",
+            "key": "CHAOS_GENESIS_FILE"
+        },
+        "ssh_config_file": {
+            "type": "env",
+            "key": "CHAOS_SSH_CONFIG_FILE"
+        },
+        "write_nym_timeout": {
+            "type": "env",
+            "key": "CHAOS_WRITE_NYM_TIMEOUT"
+        },
+        "cleanup": {
+            "type": "env",
+            "key": "CHAOS_CLEANUP"
+        },
+        "wallet_name": {
+            "type": "env",
+            "key": "CHAOS_WALLET_NAME"
+        },
+        "wallet_key": {
+            "type": "env",
+            "key": "CHAOS_WALLET_KEY"
+        },
+        "mint_payment_address": {
+            "type": "env",
+            "key": "CHAOS_MINT_PAYMENT_ADDRESS"
+        },
+        "mint_payment_address_method": {
+            "type": "env",
+            "key": "CHAOS_MINT_PAYMENT_ADDRESS_METHOD"
+        },
+        "mint_payment_address_seed": {
+            "type": "env",
+            "key": "CHAOS_MINT_PAYMENT_ADDRESS_SEED"
+        },
+        "sovatoms": {
+            "type": "env",
+            "key": "CHAOS_MINT_SOVATOMS"
+        },
+        "transfer_sovatoms": {
+            "type": "env",
+            "key": "CHAOS_TRANSFER_SOVATOMS"
+        },
+        "transfers": {
+            "type": "env",
+            "key": "CHAOS_TRANSFERS"
+        },
+        "from_payment_addresses": {
+            "type": "env",
+            "key": "CHAOS_FROM_PAYMENT_ADDRESSES"
+        },
+        "change_payment_address": {
+            "type": "env",
+            "key": "CHAOS_CHANGE_PAYMENT_ADDRESS"
+        },
+        "generate_to_payment_addresses": {
+            "type": "env",
+            "key": "CHAOS_GENERATE_TO_PAYMENT_ADDRESSES"
+        },
+        "timeout": {
+            "type": "env",
+            "key": "CHAOS_TIMEOUT"
+        }
+    },
+    "steady-state-hypothesis": {
+        "title": "Can write nym",
+        "probes": [
+            {
+                "type": "probe",
+                "name": "can-write-nym",
+                "tolerance": true,
+                "provider": {
+                    "type": "python",
+                    "module": "chaosindy.probes.write_nym",
+                    "func": "write_nym",
+                    "arguments": {
+                        "seed": "${seed}",
+                        "genesis_file": "${genesis_file}",
+                        "pool_name": "tiol_pool1",
+                        "my_wallet_name": "tiol_my_wallet1",
+                        "their_wallet_name": "tiol_their_wallet1",
+                        "timeout": "${write_nym_timeout}"
+                    }
+                }
+            }
+        ]
+    },
+    "method": [
+        {
+            "type": "action",
+            "name": "clean-pool",
+            "provider": {
+                "type": "python",
+                "module": "chaosindy.actions.pool",
+                "func": "clean_pool_by_genesis_file",
+                "arguments": {
+                    "genesis_file": "${genesis_file}",
+                    "ssh_config_file": "${ssh_config_file}"
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "delete_wallet",
+            "provider": {
+                "type": "python",
+                "module": "chaosindy.actions.wallet",
+                "func": "delete_wallet",
+                "arguments": {
+                    "wallet_name": "${wallet_name}",
+                    "wallet_key": "${wallet_key}"
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "create_wallet",
+            "provider": {
+                "type": "python",
+                "module": "chaosindy.actions.wallet",
+                "func": "create_wallet",
+                "arguments": {
+                    "wallet_name": "${wallet_name}",
+                    "wallet_key": "${wallet_key}"
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "mint",
+            "provider": {
+                "type": "python",
+                "module": "chaossovtoken.actions.mint",
+                "func": "mint_by_strategy",
+                "arguments": {
+                    "genesis_file": "${genesis_file}",
+                    "ssh_config_file": "${ssh_config_file}",
+                    "payment_address": "${mint_payment_address}",
+                    "payment_address_method": "${mint_payment_address_method}",
+                    "payment_address_seed": "${mint_payment_address_seed}",
+                    "sovatoms": "${sovatoms}",
+                    "mint_strategy": 1,
+                    "wallet_name": "${wallet_name}",
+                    "wallet_key": "${wallet_key}",
+                    "pool": "tiol_pool1"
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "create_many_txos",
+            "provider": {
+                "type": "python",
+                "module": "chaossovtoken.actions.transfer",
+                "func": "transfer_by_strategy",
+                "arguments": {
+                    "genesis_file": "${genesis_file}",
+                    "ssh_config_file": "${ssh_config_file}",
+                    "from_payment_addresses": "${from_payment_addresses}",
+                    "to_payment_addresses": "",
+                    "generate_to_payment_addresses": "${generate_to_payment_addresses}",
+                    "change_payment_address": "${change_payment_address}",
+                    "sovatoms": "${transfer_sovatoms}",
+                    "transfers": "${transfers}",
+                    "transfer_strategy": 1,
+                    "wallet_name": "${wallet_name}",
+                    "wallet_key": "${wallet_key}",
+                    "pool": "tiol_pool1",
+                    "timeout": "${timeout}"
+                }
+            }
+        },
+        {
+            "type": "action",
+            "name": "transfer_with_max_inputs_and_outputs",
+            "provider": {
+                "type": "python",
+                "module": "chaossovtoken.actions.transfer",
+                "func": "transfer_by_strategy",
+                "arguments": {
+                    "genesis_file": "${genesis_file}",
+                    "ssh_config_file": "${ssh_config_file}",
+                    "from_payment_addresses": "",
+                    "excluded_from_payment_addresses": "${mint_payment_address}",
+                    "to_payment_addresses": "",
+                    "generate_to_payment_addresses": "${generate_to_payment_addresses}",
+                    "change_payment_address": "${change_payment_address}",
+                    "sovatoms": "${transfer_sovatoms}",
+                    "transfers": "${transfers}",
+                    "transfer_strategy": 1,
+                    "wallet_name": "${wallet_name}",
+                    "wallet_key": "${wallet_key}",
+                    "pool": "tiol_pool1",
+                    "timeout": "${timeout}"
+                }
+            }
+        }
+    ],
+    "rollbacks": [
+    ]
+}
